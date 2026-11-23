@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KTX - Quản lý sự cố</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#667085;--bd:#e3e6ea;--pr:#2563eb;--ok:#16a34a;--wa:#d97706;--ne:#7c3aed}
+@media (prefers-color-scheme:dark){:root{--bg:#14161a;--card:#1d2026;--tx:#eceff3;--mu:#98a2b3;--bd:#2d323b;--pr:#5b8def}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:960px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0}h2{font-size:16px;margin:0 0 12px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label{display:block;font-size:13px;color:var(--mu);margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:80px;resize:vertical}
+.btn{background:var(--pr);color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer;font:inherit;margin-top:12px}
+.btn.s{background:none;color:var(--pr);border:1px solid var(--pr);margin:0;padding:5px 10px;font-size:13px}
+.tabs{display:flex;gap:4px;margin-bottom:12px}
+.tabs button{border:0;background:none;color:var(--mu);padding:8px 14px;border-radius:7px;cursor:pointer;font:inherit}
+.tabs button.on{background:var(--pr);color:#fff}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{color:var(--mu);font-weight:500;white-space:nowrap}
+.b{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;color:#fff;white-space:nowrap}
+.s0{background:var(--ne)}.s1{background:var(--pr)}.s2{background:var(--wa)}.s3{background:var(--ok)}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:16px}
+.st div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.st b{display:block;font-size:24px}.st span{color:var(--mu);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:12px}
+.row>*{flex:1;min-width:140px}
+.hi{color:#dc2626;font-weight:600}
+.em{color:var(--mu);padding:8px 0}
+.err{color:#dc2626;min-height:22px}
+.hide{display:none!important}
+#forgotForm,#resetForm{display:grid;gap:10px}
+.link{background:none;border:0;color:var(--pr);cursor:pointer;padding:4px 0;font:inherit;text-decoration:underline}
+.okm{color:var(--ok);min-height:22px}
+.btn:disabled{opacity:.6;cursor:default}
+small{color:var(--mu)}
+#hist{white-space:pre-line;font-size:13px}
+.media{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.th{width:56px;height:56px;padding:0;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);cursor:pointer;overflow:hidden;font-size:18px}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+#lb img,#lb video{max-width:100%;max-height:92vh;border-radius:8px}
+#lb.hide{display:none}
+</style>
+</head>
+<body>
+<div class="w">
+<header>
+<h1>🏠 KTX ĐHQG-HCM · Quản lý sự cố</h1>
+<div id="who" class="hide"><span id="whoName"></span> <button class="btn s" id="out">Đăng xuất</button></div>
+</header>
+
+<section id="auth" class="card hide" style="max-width:440px;margin:auto">
+
+<!-- Đăng nhập / Đăng ký -->
+<div id="loginForm">
+<div class="tabs"><button id="aLogin" class="on" type="button">Đăng nhập</button><button id="aReg" type="button">Đăng ký (sinh viên)</button></div>
+<div style="display:grid;gap:10px">
+<div><label>MSSV</label><input id="mssv" maxlength="20" autocomplete="username"></div>
+<div id="regOnly" style="display:none;gap:10px">
+<div><label>Họ tên</label><input id="name" maxlength="80" autocomplete="name"></div>
+<div><label>Email</label><input id="email" type="email" maxlength="254" placeholder="example@gmail.com" autocomplete="email"></div>
+<div><label>Trường học</label><input id="school" list="schoolList" maxlength="100" placeholder="VD: Trường Đại học Bách Khoa"></div>
+<datalist id="schoolList">
+<option value="Trường Đại học Bách Khoa">
+<option value="Trường Đại học Khoa học Tự nhiên">
+<option value="Trường Đại học Khoa học Xã hội và Nhân văn">
+<option value="Trường Đại học Quốc tế">
+<option value="Trường Đại học Công nghệ Thông tin">
+<option value="Trường Đại học Kinh tế - Luật">
+<option value="Trường Đại học An Giang">
+<option value="Khoa Y">
+</datalist>
+<div class="g"><div><label>Tòa</label><select id="bld"></select></div><div><label>Phòng</label><input id="num" maxlength="10" placeholder="VD: 305"></div></div>
+</div>
+<div><label>Mật khẩu</label><input id="pw" type="password" maxlength="72" autocomplete="current-password"></div>
+</div>
+<button class="btn" id="go" type="button">Đăng nhập</button>
+<div style="text-align:right" id="forgotWrap">
+<button id="forgotBtn" type="button" class="link">Quên mật khẩu?</button>
+</div>
+<div class="err" id="aerr"></div>
+</div>
+
+<!-- Form yêu cầu đặt lại mật khẩu -->
+<div id="forgotForm" class="hide">
+<h3 style="margin:0">Quên mật khẩu</h3>
+<p style="margin:0">Nhập email đã đăng ký để nhận liên kết đặt lại mật khẩu.</p>
+<div><label>Email</label><input id="forgotEmail" type="email" maxlength="254" placeholder="example@gmail.com" autocomplete="email"></div>
+<div><button class="btn" id="sendReset" type="button" style="margin-top:0">Gửi liên kết</button></div>
+<div><button id="backLogin" type="button" class="link">← Quay lại đăng nhập</button></div>
+<div class="err" id="forgotErr"></div>
+<div class="okm" id="forgotMsg"></div>
+</div>
+
+<!-- Form đặt mật khẩu mới -->
+<div id="resetForm" class="hide">
+<h3 style="margin:0">Đặt lại mật khẩu</h3>
+<div><label>Mật khẩu mới (6–72 ký tự)</label><input id="newPassword" type="password" maxlength="72" autocomplete="new-password"></div>
+<div><label>Nhập lại mật khẩu mới</label><input id="confirmPassword" type="password" maxlength="72" autocomplete="new-password"></div>
+<div><button class="btn" id="resetPasswordBtn" type="button" style="margin-top:0">Xác nhận mật khẩu mới</button></div>
+<div><button id="backLoginFromReset" type="button" class="link">← Quay lại đăng nhập</button></div>
+<div class="err" id="resetErr"></div>
+<div class="okm" id="resetMsg"></div>
+</div>
+
+</section>
+
+<section id="sv" class="hide">
+<div class="card">
+<h2>Gửi yêu cầu sửa chữa / phản ánh sự cố</h2>
+<div class="g">
+<div><label>Loại sự cố</label><select id="cat"></select></div>
+<div><label>Mức độ</label><select id="pri"><option value="thuong">Bình thường</option><option value="cao">Khẩn cấp</option></select></div>
+</div>
+<div style="margin-top:12px"><label>Mô tả</label><textarea id="desc" maxlength="1000"></textarea></div>
+<div style="margin-top:12px"><label>Ảnh / video minh chứng (tối đa 5 tệp · ảnh ≤ 8MB · video ≤ 50MB)</label>
+<input id="files" type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"></div>
+<button class="btn" id="send">Gửi yêu cầu</button>
+<div class="err" id="serr"></div>
+</div>
+<div class="card"><h2>Yêu cầu của tôi</h2><div class="tw"><table><thead><tr><th>Mã</th><th>Sự cố</th><th>Ngày gửi</th><th>Xử lý bởi</th><th>Trạng thái</th><th></th></tr></thead><tbody id="mine"></tbody></table></div></div>
+</section>
+
+<section id="ad" class="hide">
+<div class="st" id="stats"></div>
+<div class="card">
+<h2>Danh sách yêu cầu</h2>
+<div class="row"><div><label>Trạng thái</label><select id="fs"></select></div><div><label>Loại</label><select id="fl"></select></div></div>
+<div class="tw"><table><thead><tr><th>Mã</th><th>Sinh viên</th><th>Phòng</th><th>Sự cố</th><th>Phân công</th><th>Trạng thái</th><th></th></tr></thead><tbody id="all"></tbody></table></div>
+</div>
+</section>
+
+<div class="card hide" id="histCard"><h2 id="histT">Lịch sử xử lý</h2><div id="hist"></div></div>
+</div>
+
+<div id="lb" class="hide"></div>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var META,ME,mode="login";
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+async function api(m,u,b){
+  var f=b instanceof FormData;
+  var r=await fetch(u,{method:m,headers:f?{}:{"Content-Type":"application/json"},body:b?(f?b:JSON.stringify(b)):undefined});
+  var d=await r.json().catch(function(){return{}});
+  if(!r.ok)throw new Error(d.error||"Lỗi "+r.status);
+  return d;
+}
+function opts(a,sel){return a.map(function(x){return "<option"+(x===sel?" selected":"")+">"+esc(x)+"</option>"}).join("")}
+function badge(t){return '<span class="b s'+t+'">'+esc(META.STATUS[t])+'</span>'}
+function fmt(d){return new Date(d.replace(" ","T")+"Z").toLocaleString("vi-VN")}
+function mediaHtml(x){
+  if(!x.media||!x.media.length)return "";
+  return '<div class="media">'+x.media.map(function(m){
+    var v=m.mime.indexOf("video/")==0;
+    return '<button class="th" data-m="'+m.id+'" data-t="'+(v?"video":"image")+'" title="'+(v?"Xem video":"Xem ảnh")+'">'+
+      (v?"▶":'<img loading="lazy" alt="Ảnh sự cố" src="/api/media/'+m.id+'">')+'</button>';
+  }).join("")+"</div>";
+}
+function closeLb(){$("lb").classList.add("hide");$("lb").innerHTML=""}
+$("lb").onclick=closeLb;
+document.addEventListener("keydown",function(e){if(e.key=="Escape")closeLb()});
+document.addEventListener("click",function(e){
+  var t=e.target.closest&&e.target.closest("[data-m]");if(!t)return;
+  var u="/api/media/"+t.getAttribute("data-m");
+  $("lb").innerHTML=t.getAttribute("data-t")=="video"?'<video controls autoplay playsinline src="'+u+'"></video>':'<img alt="Ảnh sự cố" src="'+u+'">';
+  $("lb").classList.remove("hide");
+});
+function show(id,on){$(id).classList.toggle("hide",!on)}
+
+function setMode(m){
+  mode=m;$("aLogin").className=m=="login"?"on":"";$("aReg").className=m=="reg"?"on":"";
+  $("regOnly").style.display=m=="reg"?"grid":"none";
+  $("forgotWrap").style.display=m=="login"?"block":"none";
+  $("pw").autocomplete=m=="login"?"current-password":"new-password";
+  $("go").textContent=m=="login"?"Đăng nhập":"Đăng ký";$("aerr").textContent="";
+}
+$("aLogin").onclick=function(){setMode("login")};$("aReg").onclick=function(){setMode("reg")};
+
+// Chỉ hiện đúng một khối: loginForm | forgotForm | resetForm
+function showAuthPanel(id){
+  ["loginForm","forgotForm","resetForm"].forEach(function(p){show(p,p===id)});
+}
+
+var EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/, MSSV_RE=/^\w{4,20}$/, NAME_RE=/^[\p{L}][\p{L}\s.'-]*$/u, ROOM_RE=/^[A-Za-z0-9]{1,10}$/;
+function pwError(p){
+  if(p.length<6)return "Mật khẩu phải có ít nhất 6 ký tự.";
+  if(new TextEncoder().encode(p).length>72)return "Mật khẩu quá dài (tối đa 72 ký tự).";
+  return "";
+}
+function regError(v){
+  if(!MSSV_RE.test(v.mssv))return "MSSV phải có từ 4 đến 20 ký tự, chỉ gồm chữ cái, số hoặc dấu gạch dưới.";
+  if(v.name.length<2||v.name.length>80||!NAME_RE.test(v.name))return "Họ tên phải có từ 2 đến 80 ký tự và chỉ gồm chữ cái, khoảng trắng, dấu chấm, gạch nối.";
+  if(v.email.length>254||!EMAIL_RE.test(v.email))return "Email không hợp lệ. Ví dụ: example@gmail.com";
+  if(!v.school)return "Vui lòng nhập trường học.";
+  if(v.school.length<2||v.school.length>100)return "Tên trường phải có từ 2 đến 100 ký tự.";
+  if(!v.number)return "Vui lòng nhập số phòng.";
+  if(!ROOM_RE.test(v.number))return "Số phòng chỉ gồm chữ cái và số (tối đa 10 ký tự), ví dụ: 305.";
+  return pwError(v.password);
+}
+function clean(id){return $(id).value.trim().replace(/\s+/g," ")}
+
+$("go").onclick=async function(){
+  $("aerr").textContent="";
+  var btn=$("go"),label=btn.textContent;
+  try{
+    var mssv=$("mssv").value.trim(),pw=$("pw").value;
+    if(mode=="reg"){
+      var v={mssv:mssv,name:clean("name"),email:$("email").value.trim().toLowerCase(),school:clean("school"),building:$("bld").value,number:$("num").value.trim().toUpperCase(),password:pw};
+      var er=regError(v);if(er){$("aerr").textContent=er;return}
+      btn.disabled=true;btn.textContent="Đang xử lý...";
+      await api("POST","/api/register",v);
+    }else{
+      if(!mssv){$("aerr").textContent="Vui lòng nhập MSSV.";return}
+      if(!pw){$("aerr").textContent="Vui lòng nhập mật khẩu.";return}
+      btn.disabled=true;btn.textContent="Đang xử lý...";
+    }
+    await api("POST","/api/login",{mssv:mssv,password:pw});
+    $("pw").value="";
+    start();
+  }catch(e){$("aerr").textContent=e.message}
+  btn.disabled=false;btn.textContent=label;
+};
+["mssv","pw","name","email","school","num"].forEach(function(id){
+  $(id).addEventListener("keydown",function(e){if(e.key=="Enter")$("go").click()});
+});
+
+// Mở form quên mật khẩu
+$("forgotBtn").onclick=function(){
+  $("forgotErr").textContent="";$("forgotMsg").textContent="";
+  showAuthPanel("forgotForm");$("forgotEmail").focus();
+};
+$("backLogin").onclick=function(){showAuthPanel("loginForm");setMode("login")};
+
+// Gửi yêu cầu đặt lại mật khẩu
+$("sendReset").onclick=async function(){
+  $("forgotErr").textContent="";$("forgotMsg").textContent="";
+  var email=$("forgotEmail").value.trim().toLowerCase();
+  if(!email){$("forgotErr").textContent="Vui lòng nhập email đã đăng ký.";return}
+  if(email.length>254||!EMAIL_RE.test(email)){$("forgotErr").textContent="Vui lòng nhập email hợp lệ. Ví dụ: example@gmail.com";return}
+  var btn=$("sendReset");btn.disabled=true;btn.textContent="Đang gửi...";
+  try{
+    var r=await api("POST","/api/forgot-password",{email:email});
+    $("forgotMsg").textContent=r.message||"Nếu email đã đăng ký, bạn sẽ nhận được liên kết đặt lại mật khẩu.";
+  }catch(e){$("forgotErr").textContent=e.message}
+  btn.disabled=false;btn.textContent="Gửi liên kết";
+};
+$("forgotEmail").addEventListener("keydown",function(e){if(e.key=="Enter")$("sendReset").click()});
+
+// Token trong liên kết email: /?resetToken=...
+var resetToken=new URLSearchParams(location.search).get("resetToken");
+function leaveReset(){
+  resetToken=null;history.replaceState(null,"",location.pathname);
+}
+$("backLoginFromReset").onclick=function(){leaveReset();start()};
+
+// Xác nhận mật khẩu mới
+$("resetPasswordBtn").onclick=async function(){
+  $("resetErr").textContent="";$("resetMsg").textContent="";
+  var password=$("newPassword").value,confirmPassword=$("confirmPassword").value;
+  if(!resetToken||!/^[a-f0-9]{64}$/.test(resetToken)){$("resetErr").textContent="Liên kết đặt lại mật khẩu không hợp lệ. Vui lòng yêu cầu liên kết mới.";return}
+  var er=pwError(password);if(er){$("resetErr").textContent=er;return}
+  if(password!==confirmPassword){$("resetErr").textContent="Hai mật khẩu không khớp.";return}
+  var btn=$("resetPasswordBtn");btn.disabled=true;btn.textContent="Đang xử lý...";
+  try{
+    var r=await api("POST","/api/reset-password",{token:resetToken,password:password});
+    $("resetMsg").textContent=r.message||"Đặt lại mật khẩu thành công. Bạn có thể đăng nhập.";
+    $("newPassword").value="";$("confirmPassword").value="";
+    leaveReset();
+    setTimeout(function(){start()},1500);
+  }catch(e){$("resetErr").textContent=e.message}
+  btn.disabled=false;btn.textContent="Xác nhận mật khẩu mới";
+};
+$("confirmPassword").addEventListener("keydown",function(e){if(e.key=="Enter")$("resetPasswordBtn").click()});
+$("out").onclick=async function(){await api("POST","/api/logout");start()};
+
+async function start(){
+  show("auth",false);show("sv",false);show("ad",false);show("who",false);show("histCard",false);
+  if(resetToken){show("auth",true);showAuthPanel("resetForm");return}   // mở từ liên kết email
+  ME=(await api("GET","/api/me")).user;
+  if(!ME){show("auth",true);showAuthPanel("loginForm");setMode("login");return}
+  $("whoName").textContent=ME.name+(ME.role=="admin"?" (Ban quản lý)":" · "+ME.mssv);show("who",true);
+  if(ME.role=="admin"){show("ad",true);loadAdmin()}else{show("sv",true);loadMine()}
+}
+
+async function loadMine(){
+  var l=await api("GET","/api/requests");
+  $("mine").innerHTML=l.length?l.map(function(x){
+    return "<tr><td>#"+x.id+"</td><td>"+esc(x.category)+(x.priority=="cao"?' <span class="hi">!</span>':"")+"<br><small>"+esc(x.description)+"</small>"+mediaHtml(x)+"</td><td>"+fmt(x.created_at)+"</td><td>"+esc(x.assignee||"—")+"</td><td>"+badge(x.status)+'</td><td><button class="btn s" data-h="'+x.id+'">Lịch sử</button></td></tr>';
+  }).join(""):'<tr><td colspan="6" class="em">Chưa có yêu cầu nào.</td></tr>';
+}
+$("send").onclick=async function(){
+  $("serr").textContent="";
+  var fl=$("files").files;
+  var d=$("desc").value.trim();
+  if(!d){$("serr").textContent="Vui lòng nhập mô tả sự cố";return}
+  if(d.length<5){$("serr").textContent="Mô tả quá ngắn (tối thiểu 5 ký tự)";return}
+  if(d.length>1000){$("serr").textContent="Mô tả tối đa 1000 ký tự";return}
+  if(fl.length>5){$("serr").textContent="Tối đa 5 tệp";return}
+  var fd=new FormData();
+  fd.append("category",$("cat").value);fd.append("priority",$("pri").value);fd.append("description",$("desc").value);
+  for(var i=0;i<fl.length;i++){
+    var f=fl[i],img=f.type.indexOf("image/")==0;
+    if(f.size>(img?8:50)*1024*1024){$("serr").textContent=f.name+" quá lớn (ảnh ≤ 8MB, video ≤ 50MB)";return}
+    fd.append("media",f);
+  }
+  var btn=$("send");btn.disabled=true;btn.textContent="Đang gửi...";
+  try{
+    await api("POST","/api/requests",fd);
+    $("desc").value="";$("files").value="";loadMine();
+  }catch(e){$("serr").textContent=e.message}
+  btn.disabled=false;btn.textContent="Gửi yêu cầu";
+};
+
+async function loadAdmin(){
+  var q="?status="+encodeURIComponent($("fs").value)+"&category="+encodeURIComponent($("fl").value);
+  var r=await Promise.all([api("GET","/api/requests"+q),api("GET","/api/stats")]);
+  var l=r[0],s=r[1],cnt={},tot=0;
+  s.byStatus.forEach(function(x){cnt[x.status]=x.n;tot+=x.n});
+  $("stats").innerHTML="<div><b>"+tot+"</b><span>Tổng yêu cầu</span></div>"+META.STATUS.map(function(n,i){return "<div><b>"+(cnt[i]||0)+"</b><span>"+esc(n)+"</span></div>"}).join("");
+  $("all").innerHTML=l.length?l.map(function(x){
+    return "<tr><td>#"+x.id+"</td><td>"+esc(x.name)+"<br><small>"+esc(x.mssv)+(x.school?" · "+esc(x.school):"")+"</small></td><td>"+esc(x.building+x.number)+"</td>"+
+    "<td>"+esc(x.category)+(x.priority=="cao"?' <span class="hi">!</span>':"")+"<br><small>"+esc(x.description)+"</small>"+mediaHtml(x)+"</td>"+
+    '<td><select data-id="'+x.id+'" data-f="assignee"><option value="">—</option>'+opts(META.TEAMS,x.assignee)+"</select></td>"+
+    '<td><select data-id="'+x.id+'" data-f="status">'+META.STATUS.map(function(n,i){return '<option value="'+i+'"'+(i==x.status?" selected":"")+">"+esc(n)+"</option>"}).join("")+"</select></td>"+
+    '<td><button class="btn s" data-h="'+x.id+'">Lịch sử</button></td></tr>';
+  }).join(""):'<tr><td colspan="7" class="em">Không có yêu cầu.</td></tr>';
+}
+$("all").onchange=async function(e){
+  var el=e.target,id=el.getAttribute("data-id");if(!id)return;
+  var b={};b[el.getAttribute("data-f")]=el.value;
+  try{await api("PATCH","/api/requests/"+id,b)}catch(err){alert(err.message)}
+  loadAdmin();
+};
+$("fs").onchange=loadAdmin;$("fl").onchange=loadAdmin;
+
+document.addEventListener("click",async function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-h");if(!id)return;
+  var h=await api("GET","/api/requests/"+id+"/history");
+  $("histT").textContent="Lịch sử yêu cầu #"+id;
+  $("hist").textContent=h.map(function(x){return fmt(x.changed_at)+" — "+META.STATUS[x.status]+(x.assignee?" ("+x.assignee+")":"")+" · bởi "+x.changed_by}).join("\n");
+  show("histCard",true);$("histCard").scrollIntoView({behavior:"smooth"});
+});
+
+(async function(){
+  try{META=await api("GET","/api/meta")}catch(e){
+    document.querySelector(".w").insertAdjacentHTML("beforeend",'<div class="card err">Không kết nối được máy chủ. Hãy chạy <b>npm start</b> trong thư mục dự án rồi mở <b>http://localhost:3000</b> (không mở trực tiếp file index.html).</div>');
+    return;
+  }
+  $("bld").innerHTML=opts(META.BUILDINGS);$("cat").innerHTML=opts(META.CATEGORIES);
+  $("fs").innerHTML='<option value="">Tất cả</option>'+META.STATUS.map(function(n,i){return '<option value="'+i+'">'+esc(n)+"</option>"}).join("");
+  $("fl").innerHTML='<option value="">Tất cả</option>'+opts(META.CATEGORIES);
+  start();
+})();
+</script>
+</body>
+</html>

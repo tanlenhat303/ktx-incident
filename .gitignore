@@ -1,0 +1,5 @@
+node_modules/
+.env
+ktx.db
+ktx.db-*
+uploads/
