@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Hệ thống quản lý sự cố KTX ĐHQG-HCM
 
 Node.js + Express + SQLite (better-sqlite3). Giao diện thuần HTML/JS trong `public/`.
@@ -28,3 +29,6 @@ Sinh viên tự đăng ký bằng MSSV, họ tên, email, **trường học** v�
 | PATCH | /api/requests/:id  `{status, assignee}` | admin |
 | GET | /api/requests/:id/history | chủ yêu cầu / admin |
 | GET | /api/stats | admin |
+=======
+# ktx-incident
+>>>>>>> origin/main
